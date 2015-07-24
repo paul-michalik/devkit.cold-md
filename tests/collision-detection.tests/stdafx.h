@@ -11,3 +11,13 @@
 #include "CppUnitTest.h"
 
 // TODO: reference additional headers your program requires here
+#include <btBulletCollisionCommon.h>
+#include <btBulletDynamicsCommon.h>
+#include <iostream>
+#include <strstream>
+#include <string>
+#include <vector>
+#include <map>
+#include <type_traits>
+#include <algorithm>
+#include <functional>

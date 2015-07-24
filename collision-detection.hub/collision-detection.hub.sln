@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.40629.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "collision-detection.prj", "..\collision-detection.prj\collision-detetction.prj.vcxproj", "{CB6406FA-8DB0-4945-B661-F221CE941D80}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "collision-detection.tests", "..\tests\collision-detection.tests\collision-detection.tests.vcxproj", "{89237FF1-697F-4D6D-92F4-AC8A50EC065B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CB6406FA-8DB0-4945-B661-F221CE941D80}.Debug|Win32.ActiveCfg = Debug|Win32
+		{CB6406FA-8DB0-4945-B661-F221CE941D80}.Debug|Win32.Build.0 = Debug|Win32
+		{CB6406FA-8DB0-4945-B661-F221CE941D80}.Release|Win32.ActiveCfg = Release|Win32
+		{CB6406FA-8DB0-4945-B661-F221CE941D80}.Release|Win32.Build.0 = Release|Win32
+		{89237FF1-697F-4D6D-92F4-AC8A50EC065B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{89237FF1-697F-4D6D-92F4-AC8A50EC065B}.Debug|Win32.Build.0 = Debug|Win32
+		{89237FF1-697F-4D6D-92F4-AC8A50EC065B}.Release|Win32.ActiveCfg = Release|Win32
+		{89237FF1-697F-4D6D-92F4-AC8A50EC065B}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

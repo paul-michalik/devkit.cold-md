@@ -187,3 +187,4 @@ FakesAssemblies/
 GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
+/targets/tmp/collision-detection.tests.x86.v120.Debug/collision-detection.tests/collisio.89237FF1.tlog/unsuccessfulbuild

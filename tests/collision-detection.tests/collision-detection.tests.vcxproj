@@ -103,12 +103,8 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <ShowProgress>LinkVerbose</ShowProgress>
     </Link>
-    <PreLinkEvent>
-      <Command>echo LibraryPath = $(LibraryPath)
-echo RecipeBulletLibDir = $(RecipeBulletLibDir)</Command>
-    </PreLinkEvent>
+    <PreLinkEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>

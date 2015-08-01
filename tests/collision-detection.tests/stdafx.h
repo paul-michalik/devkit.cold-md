@@ -13,6 +13,9 @@
 // TODO: reference additional headers your program requires here
 #include <btBulletCollisionCommon.h>
 #include <btBulletDynamicsCommon.h>
+#include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
+#include <mstest_utils/crt_mem_check.h>
+#include <mstest_utils/log_message.h>
 #include <iostream>
 #include <strstream>
 #include <string>
@@ -21,3 +24,5 @@
 #include <type_traits>
 #include <algorithm>
 #include <functional>
+#include <memory>
+#include <iterator>

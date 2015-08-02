@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
-#include <cold-md.contract/cold-md.h>
-#include <cold-md.bullet/world.h>
+#include <cold-md/bullet/world.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -35,12 +34,12 @@ namespace tests {
         public:
             TEST_METHOD_INITIALIZE(set_up)
             {
-//                MSTEST_UTILS_TRACKED_MEM_CHECK_START();
+                MSTEST_UTILS_TRACKED_MEM_CHECK_START();
             }
 
             TEST_METHOD_CLEANUP(tear_down)
             {
- //               MSTEST_UTILS_TRACKED_MEM_CHECK_FINISH();
+                MSTEST_UTILS_TRACKED_MEM_CHECK_FINISH();
             }
 
             TEST_METHOD(can_construct_broadphase)
@@ -203,7 +202,9 @@ namespace tests {
 
             TEST_METHOD(bullet_world_detects_collisions_with_what_precision_wrt_defined_margin)
             {
+                Assert::Fail(L"not implemented");
             }
+
             TEST_METHOD(bullet_world_reacts_on_broad_phase_callback)
             {
                 Assert::Fail(L"not implemented");

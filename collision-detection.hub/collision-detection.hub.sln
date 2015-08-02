@@ -3,9 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "collision-detection.prj", "..\collision-detection.prj\collision-detetction.prj.vcxproj", "{CB6406FA-8DB0-4945-B661-F221CE941D80}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "collision-detection.tests", "..\tests\collision-detection.tests\collision-detection.tests.vcxproj", "{89237FF1-697F-4D6D-92F4-AC8A50EC065B}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cold-md.tests", "..\tests\collision-detection.tests\collision-detection.tests.vcxproj", "{89237FF1-697F-4D6D-92F4-AC8A50EC065B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".git", ".git", "{AEE2D875-4302-4EB6-BFF1-A52360347ED5}"
 	ProjectSection(SolutionItems) = preProject
@@ -26,14 +24,6 @@ Global
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{CB6406FA-8DB0-4945-B661-F221CE941D80}.Debug|Win32.ActiveCfg = Debug|Win32
-		{CB6406FA-8DB0-4945-B661-F221CE941D80}.Debug|Win32.Build.0 = Debug|Win32
-		{CB6406FA-8DB0-4945-B661-F221CE941D80}.Debug|x64.ActiveCfg = Debug|x64
-		{CB6406FA-8DB0-4945-B661-F221CE941D80}.Debug|x64.Build.0 = Debug|x64
-		{CB6406FA-8DB0-4945-B661-F221CE941D80}.Release|Win32.ActiveCfg = Release|Win32
-		{CB6406FA-8DB0-4945-B661-F221CE941D80}.Release|Win32.Build.0 = Release|Win32
-		{CB6406FA-8DB0-4945-B661-F221CE941D80}.Release|x64.ActiveCfg = Release|x64
-		{CB6406FA-8DB0-4945-B661-F221CE941D80}.Release|x64.Build.0 = Release|x64
 		{89237FF1-697F-4D6D-92F4-AC8A50EC065B}.Debug|Win32.ActiveCfg = Debug|Win32
 		{89237FF1-697F-4D6D-92F4-AC8A50EC065B}.Debug|Win32.Build.0 = Debug|Win32
 		{89237FF1-697F-4D6D-92F4-AC8A50EC065B}.Debug|x64.ActiveCfg = Debug|x64

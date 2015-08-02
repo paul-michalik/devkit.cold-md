@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{CB6406FA-8DB0-4945-B661-F221CE941D80}</ProjectGuid>
     <RootNamespace>collisiondetetctionprj</RootNamespace>
-    <ProjectName>collision-detection.prj</ProjectName>
+    <ProjectName>cold-md.tests.prj</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

@@ -20,6 +20,7 @@
 #include <strstream>
 #include <string>
 #include <vector>
+#include <array>
 #include <map>
 #include <type_traits>
 #include <algorithm>

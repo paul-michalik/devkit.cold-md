@@ -22,6 +22,7 @@
 #include <vector>
 #include <array>
 #include <map>
+#include <set>
 #include <type_traits>
 #include <algorithm>
 #include <functional>

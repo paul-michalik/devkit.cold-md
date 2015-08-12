@@ -382,12 +382,24 @@ namespace tests {
 
                     int t_pos_count = 0;
                     for (auto &t_test : t_test_data) {
+                        Logger::WriteMessage(mstest_utils::wlog_message() <<
+                            "position: " << t_pos_count << std::endl
+                            | mstest_utils::as_string);
+
                         t_world->m_objs.objects[1]->getWorldTransform()
                             .setOrigin(std::get<0>(t_test));
                         t_world->get_world()->performDiscreteCollisionDetection();
-                    }
 
-                    Assert::AreEqual(1u, t_callback.m_cache.size());
+                        Assert::AreEqual(1u, t_callback.m_cache.size());
+                        Assert::AreEqual(1, t_callback.m_num_of_calls);
+
+                        // reset callback
+                        test_broadphase_callback::callback_cache_t()
+                            .swap(t_callback.m_cache);
+                        t_callback.m_num_of_calls = 0;
+
+                        t_pos_count++;
+                    }
                 }
             }
 
@@ -479,12 +491,24 @@ namespace tests {
 
                     int t_pos_count = 0;
                     for (auto &t_test : t_test_data) {
+                        Logger::WriteMessage(mstest_utils::wlog_message() <<
+                            "position: " << t_pos_count << std::endl
+                            | mstest_utils::as_string);
+
                         t_world->m_objs.objects[1]->getWorldTransform()
                             .setOrigin(std::get<0>(t_test));
                         t_world->get_world()->performDiscreteCollisionDetection();
-                    }
 
-                    Assert::AreEqual(1u, t_callback.m_cache.size());
+                        Assert::AreEqual(1u, t_callback.m_cache.size());
+                        Assert::AreEqual(1, t_callback.m_num_of_calls);
+
+                        // reset callback
+                        test_broadphase_callback::callback_cache_t()
+                            .swap(t_callback.m_cache);
+                        t_callback.m_num_of_calls = 0;
+
+                        t_pos_count++;
+                    }
                 }
 
             }

@@ -177,6 +177,11 @@
     </ClCompile>
     <ClCompile Include="cold-md.bullet.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\cold-md.bullet\cold-md.bullet.vcxproj">
+      <Project>{b23de02e-aea9-4ace-a7b1-18f3f1a69206}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

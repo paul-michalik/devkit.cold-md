@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cold-md.h">
+    <ClInclude Include="..\cold-md\contract\cold-md.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

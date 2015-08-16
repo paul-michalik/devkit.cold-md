@@ -20,6 +20,21 @@ namespace tests {
             2, 3, 0
         };
 
+        std::tuple<btVector3, int, int> c_contact_test_data[] = {
+            // position, expected num of contacts, actual num of contacts (inital = 0):
+            std::make_tuple(btVector3{2. + 100 * c_margin, 100 * c_margin, 0}, 0, 0),
+            std::make_tuple(btVector3{2. - 1 * c_margin, 2. - 1 * c_margin, 0}, 1, 0),
+            std::make_tuple(btVector3{2. - 2 * c_margin, 2. - 2 * c_margin, 0}, 1, 0),
+            std::make_tuple(btVector3{2. - 4 * c_margin, 2. - 4 * c_margin, 0}, 1, 0),
+            std::make_tuple(btVector3{2. - 8 * c_margin, 2. - 8 * c_margin, 0}, 1, 0),
+            std::make_tuple(btVector3{2. - 16 * c_margin, 2. - 16 * c_margin, 0}, 1, 0),
+            std::make_tuple(btVector3{2. - 32 * c_margin, 2. - 32 * c_margin, 0}, 4, 0),
+            std::make_tuple(btVector3{2. - 100 * c_margin, 2. - 100 * c_margin, 0}, 4, 0),
+            std::make_tuple(btVector3{2. - 200 * c_margin, 2. - 200 * c_margin, 0}, 4, 0),
+            std::make_tuple(btVector3{2., 2., 0}, 1, 0),
+            std::make_tuple(btVector3{2. + 1 * c_margin, 2. + 1 * c_margin, 0}, 0, 0),
+        };
+
         btTriangleIndexVertexArray c_unit_square_data(
             c_unit_square_tri.size() / 3u, &c_unit_square_tri[0], 3 * sizeof(int),
             c_unit_square_ver.size() / 3u, &c_unit_square_ver[0], 3 * sizeof(btScalar));
@@ -248,23 +263,9 @@ namespace tests {
                     Assert::IsTrue(!!t_world);
                     Assert::AreEqual(2, t_world->get_world()->getCollisionObjectArray().size());
 
-                    std::tuple<btVector3, int, int> t_test_data[] = {
-                        // position, expected num of contacts, actual num of contacts (inital = 0):
-                        std::make_tuple(btVector3{2. + 100 * c_margin, 100 * c_margin, 0}, 0, 0),
-                        std::make_tuple(btVector3{2. - 1 * c_margin, 2. - 1 * c_margin, 0}, 1, 0),
-                        std::make_tuple(btVector3{2. - 2 * c_margin, 2. - 2 * c_margin, 0}, 1, 0),
-                        std::make_tuple(btVector3{2. - 4 * c_margin, 2. - 4 * c_margin, 0}, 1, 0),
-                        std::make_tuple(btVector3{2. - 8 * c_margin, 2. - 8 * c_margin, 0}, 1, 0),
-                        std::make_tuple(btVector3{2. - 16 * c_margin, 2. - 16 * c_margin, 0}, 1, 0),
-                        std::make_tuple(btVector3{2. - 32 * c_margin, 2. - 32 * c_margin, 0}, 4, 0),
-                        std::make_tuple(btVector3{2. - 100 * c_margin, 2. - 100 * c_margin, 0}, 4, 0),
-                        std::make_tuple(btVector3{2. - 200 * c_margin, 2. - 200 * c_margin, 0}, 4, 0),
-                        std::make_tuple(btVector3{2., 2., 0}, 1, 0),
-                        std::make_tuple(btVector3{2. + 1 * c_margin, 2. + 1 * c_margin, 0}, 0, 0),
-                    };
 
                     int t_pos_count = 0;
-                    for (auto &t_test : t_test_data) {
+                    for (auto &t_test : c_contact_test_data) {
                         t_world->m_objs.objects[1]->getWorldTransform()
                             .setOrigin(std::get<0>(t_test));
 
@@ -273,8 +274,7 @@ namespace tests {
 
                         Logger::WriteMessage(mstest_utils::wlog_message()
                             << "position: " << t_pos_count
-                            << std::endl << "-------------" << std::endl
-                            | mstest_utils::as_string);
+                            << std::endl << "-------------" << endl);
 
                         for (auto m = 0; m < t_world
                             ->get_world()
@@ -286,7 +286,7 @@ namespace tests {
 
                                 Logger::WriteMessage(mstest_utils::wlog_message()
                                     << "manifold: " << m << std::endl
-                                    << "contact: " << c << std::endl | mstest_utils::as_string);
+                                    << "contact: " << c << endl);
 
                                 ++std::get<2>(t_test);
                             }
@@ -295,7 +295,7 @@ namespace tests {
                     }
 
                     t_pos_count = 0;
-                    for (auto const &t_test : t_test_data) {
+                    for (auto const &t_test : c_contact_test_data) {
                         Logger::WriteMessage(mstest_utils::wlog_message()
                             << "position: " << t_pos_count++ << " -> exp/act "
                             << std::get<1>(t_test) << "/"
@@ -321,7 +321,9 @@ namespace tests {
                     btBroadphaseProxy* proxy0, 
                     btBroadphaseProxy* proxy1) const
                 {
-                    ++m_num_of_calls;
+                    Logger::WriteMessage(mstest_utils::wlog_message() <<
+                        __FUNCTION__ << std::endl <<
+                        L"call nr.: " << m_num_of_calls << endl);
 
                     auto t_insert_res = this->m_cache.emplace(
                         std::min(proxy0->m_clientObject, proxy1->m_clientObject),
@@ -330,15 +332,12 @@ namespace tests {
                     if (t_insert_res.second) {
                         Logger::WriteMessage(mstest_utils::wlog_message() <<
                             __FUNCTION__ << std::endl <<
-                            L"Inserted in: " <<
+                            L"inserted: " <<
                             t_insert_res.first->first << ", " <<
-                            t_insert_res.first->second << std::endl
-                            << as_string);
+                            t_insert_res.first->second << endl);
                     }
 
-                    Logger::WriteMessage(mstest_utils::wlog_message() <<
-                        __FUNCTION__ << std::endl <<
-                        L"call nr.: " << m_num_of_calls << std::endl << as_string);
+                    ++m_num_of_calls;
 
                     return true;
                 }
@@ -358,21 +357,6 @@ namespace tests {
                     Assert::IsTrue(!!t_world);
                     Assert::AreEqual(2, t_world->get_world()->getCollisionObjectArray().size());
 
-                    std::tuple<btVector3, int, int> t_test_data[] = {
-                        // position, expected num of contacts, actual num of contacts (inital = 0):
-                        std::make_tuple(btVector3{2. + 100 * c_margin, 100 * c_margin, 0}, 0, 0),
-                        std::make_tuple(btVector3{2. - 1 * c_margin, 2. - 1 * c_margin, 0}, 1, 0),
-                        std::make_tuple(btVector3{2. - 2 * c_margin, 2. - 2 * c_margin, 0}, 1, 0),
-                        std::make_tuple(btVector3{2. - 4 * c_margin, 2. - 4 * c_margin, 0}, 1, 0),
-                        std::make_tuple(btVector3{2. - 8 * c_margin, 2. - 8 * c_margin, 0}, 1, 0),
-                        std::make_tuple(btVector3{2. - 16 * c_margin, 2. - 16 * c_margin, 0}, 1, 0),
-                        std::make_tuple(btVector3{2. - 32 * c_margin, 2. - 32 * c_margin, 0}, 4, 0),
-                        std::make_tuple(btVector3{2. - 100 * c_margin, 2. - 100 * c_margin, 0}, 4, 0),
-                        std::make_tuple(btVector3{2. - 200 * c_margin, 2. - 200 * c_margin, 0}, 4, 0),
-                        std::make_tuple(btVector3{2., 2., 0}, 1, 0),
-                        std::make_tuple(btVector3{2. + 1 * c_margin, 2. + 1 * c_margin, 0}, 0, 0),
-                    };
-
                     // install callback:
                     test_broadphase_callback t_callback;
                     t_world->get_world()
@@ -380,9 +364,9 @@ namespace tests {
                         ->setOverlapFilterCallback(&t_callback);
 
                     int t_pos_count = 0;
-                    for (auto &t_test : t_test_data) {
+                    for (auto &t_test : c_contact_test_data) {
                         Logger::WriteMessage(mstest_utils::wlog_message() <<
-                            "position: " << t_pos_count << std::endl << as_string);
+                            "position: " << t_pos_count << endl);
 
                         t_world->m_objs.objects[1]->getWorldTransform()
                             .setOrigin(std::get<0>(t_test));
@@ -412,7 +396,9 @@ namespace tests {
                     btCollisionDispatcher& dispatcher,
                     const btDispatcherInfo& dispatchInfo)
                 {
-                    ++m_num_of_calls;
+                    Logger::WriteMessage(mstest_utils::wlog_message() <<
+                        __FUNCTION__ << std::endl <<
+                        L"call nr.: " << m_num_of_calls << endl);
 
                     auto t_insert_res = this->m_cache.emplace(
                         std::min(
@@ -425,16 +411,12 @@ namespace tests {
                     if (t_insert_res.second) {
                         Logger::WriteMessage(mstest_utils::wlog_message() <<
                             __FUNCTION__ << std::endl <<
-                            L"Inserted in: " <<
+                            L"inserted: " <<
                             t_insert_res.first->first << ", " <<
-                            t_insert_res.first->second << std::endl
-                            | mstest_utils::as_string);
+                            t_insert_res.first->second << endl);
                     }
 
-                    Logger::WriteMessage(mstest_utils::wlog_message() <<
-                        __FUNCTION__ << std::endl <<
-                        L"call nr.: " << m_num_of_calls << std::endl
-                        | mstest_utils::as_string);
+                    ++m_num_of_calls;
                 }
             public:
                 static void nearphase_callback(
@@ -464,21 +446,6 @@ namespace tests {
                     Assert::IsTrue(!!t_world);
                     Assert::AreEqual(2, t_world->get_world()->getCollisionObjectArray().size());
 
-                    std::tuple<btVector3, int, int> t_test_data[] = {
-                        // position, expected num of contacts, actual num of contacts (inital = 0):
-                        std::make_tuple(btVector3{2. + 100 * c_margin, 100 * c_margin, 0}, 0, 0),
-                        std::make_tuple(btVector3{2. - 1 * c_margin, 2. - 1 * c_margin, 0}, 1, 0),
-                        std::make_tuple(btVector3{2. - 2 * c_margin, 2. - 2 * c_margin, 0}, 1, 0),
-                        std::make_tuple(btVector3{2. - 4 * c_margin, 2. - 4 * c_margin, 0}, 1, 0),
-                        std::make_tuple(btVector3{2. - 8 * c_margin, 2. - 8 * c_margin, 0}, 1, 0),
-                        std::make_tuple(btVector3{2. - 16 * c_margin, 2. - 16 * c_margin, 0}, 1, 0),
-                        std::make_tuple(btVector3{2. - 32 * c_margin, 2. - 32 * c_margin, 0}, 4, 0),
-                        std::make_tuple(btVector3{2. - 100 * c_margin, 2. - 100 * c_margin, 0}, 4, 0),
-                        std::make_tuple(btVector3{2. - 200 * c_margin, 2. - 200 * c_margin, 0}, 4, 0),
-                        std::make_tuple(btVector3{2., 2., 0}, 1, 0),
-                        std::make_tuple(btVector3{2. + 1 * c_margin, 2. + 1 * c_margin, 0}, 0, 0),
-                    };
-
                     // install callback:
                     dynamic_cast<btCollisionDispatcher*>(
                         t_world->get_world()
@@ -488,7 +455,7 @@ namespace tests {
                     test_nearphase_callback t_callback;
 
                     int t_pos_count = 0;
-                    for (auto &t_test : t_test_data) {
+                    for (auto &t_test : c_contact_test_data) {
                         Logger::WriteMessage(mstest_utils::wlog_message() <<
                             "position: " << t_pos_count << std::endl
                             | mstest_utils::as_string);

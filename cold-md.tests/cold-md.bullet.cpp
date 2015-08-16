@@ -333,13 +333,12 @@ namespace tests {
                             L"Inserted in: " <<
                             t_insert_res.first->first << ", " <<
                             t_insert_res.first->second << std::endl
-                            | mstest_utils::as_string);
+                            << as_string);
                     }
 
                     Logger::WriteMessage(mstest_utils::wlog_message() <<
                         __FUNCTION__ << std::endl <<
-                        L"call nr.: " << m_num_of_calls << std::endl
-                        | mstest_utils::as_string);
+                        L"call nr.: " << m_num_of_calls << std::endl << as_string);
 
                     return true;
                 }
@@ -383,8 +382,7 @@ namespace tests {
                     int t_pos_count = 0;
                     for (auto &t_test : t_test_data) {
                         Logger::WriteMessage(mstest_utils::wlog_message() <<
-                            "position: " << t_pos_count << std::endl
-                            | mstest_utils::as_string);
+                            "position: " << t_pos_count << std::endl << as_string);
 
                         t_world->m_objs.objects[1]->getWorldTransform()
                             .setOrigin(std::get<0>(t_test));

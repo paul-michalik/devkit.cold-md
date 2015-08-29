@@ -26,7 +26,10 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="cold-md.bullet.cpp">
+    <ClCompile Include="cold-md.bullet_exploration.tests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cold-md.mindist.tests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

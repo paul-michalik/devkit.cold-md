@@ -121,6 +121,9 @@
   <ItemGroup>
     <ClInclude Include="..\cold-md\contract\cold-md.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\cold-md\contract\cold-md.cpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

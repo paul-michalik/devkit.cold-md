@@ -107,17 +107,66 @@ namespace tests {
                 MSTEST_UTILS_TRACKED_MEM_CHECK_FINISH();
             }
 
-            TEST_METHOD(local_data_of_gimpact_mesh_shape)
+            TEST_METHOD(access_local_data_of_gimpact_mesh_shape)
             {
                 auto s = std::make_unique<btGImpactMeshShape>(&c_unit_square_data);
-                s->setMargin(0.001);
+                s->setMargin(c_margin);
                 s->updateBound();
 
+                {
+                    btTransform t(btQuaternion(0, 0, 0), btVector3(0, 0, 0));
+                    btVector3 min, max;
+                    s->getAabb(t, min, max);
+                    Logger::WriteMessage(mstest_utils::wlog_message()
+                        << "min: " << min.getX() << ", " << min.getY() << ", " << min.getZ() << ": "
+                        << btVector3(-1, -1, 0).distance(min) << std::endl
+                        << "max: " << max.getX() << ", " << max.getY() << ", " << max.getZ() << ": "
+                        << btVector3(+1, +1, 0).distance(max) << std::endl << endl);
+
+                    Assert::IsTrue(btVector3(-1, -1, 0).distance(min) <= 2 * c_margin);
+                    Assert::IsTrue(btVector3(+1, +1, 0).distance(max) <= 2 * c_margin);
+                }
+
                 Assert::AreEqual(1, s->getMeshPartCount());
-                s->
-                Assert::AreEqual(true, s->hasBoxSet());
-                Assert::IsTrue(nullptr != s->getBoxSet());
-                Assert::AreEqual(3, s->getBoxSet()->getNodeCount());
+                Assert::IsTrue(nullptr != s->getMeshPart(0));
+                Assert::IsTrue(nullptr != s->getMeshPart(0)->getBoxSet());
+
+                // This is necessary, otherwise the data just isn't there.
+                // I don't see a reason, maybe google saw one...
+                s->getMeshPart(0)->lockChildShapes();
+                Assert::IsTrue(0 < s->getMeshPart(0)->getBoxSet()->getNodeCount());
+                Assert::IsTrue(nullptr != s->getMeshPart(0)->getBoxSet()->getPrimitiveManager());
+                Assert::AreEqual(2, s->getMeshPart(0)->getBoxSet()->getPrimitiveManager()->get_primitive_count());
+                {
+                    btPrimitiveTriangle t;
+                    auto pm = s->getMeshPart(0)->getBoxSet()->getPrimitiveManager();
+                    pm->get_primitive_triangle(0, t);
+                    Logger::WriteMessage(mstest_utils::wlog_message()
+                        << "0: " << t.m_vertices[0].getX() << ", " << t.m_vertices[0].getY() << ", " << t.m_vertices[0].getZ() << std::endl
+                        << "1: " << t.m_vertices[1].getX() << ", " << t.m_vertices[1].getY() << ", " << t.m_vertices[2].getZ() << std::endl
+                        << "2: " << t.m_vertices[2].getX() << ", " << t.m_vertices[2].getY() << ", " << t.m_vertices[2].getZ() << endl);
+
+                    Assert::IsTrue(btVector3(-1, -1, 0).distance(t.m_vertices[0]) < c_margin);
+                    Assert::IsTrue(btVector3(+1, -1, 0).distance(t.m_vertices[1]) < c_margin);
+                    Assert::IsTrue(btVector3(+1, +1, 0).distance(t.m_vertices[2]) < c_margin);
+                }
+                {
+                    btAABB b;
+                    auto pm = s->getMeshPart(0)->getBoxSet()->getPrimitiveManager();
+                    pm->get_primitive_box(0, b);
+                    Assert::IsTrue(btVector3(-1, -1, 0).distance(b.m_min) <= 2 * c_margin);
+                    Assert::IsTrue(btVector3(+1, +1, 0).distance(b.m_max) <= 2 * c_margin);
+
+                    pm->get_primitive_box(1, b);
+                    Assert::IsTrue(btVector3(-1, -1, 0).distance(b.m_min) <= 2 * c_margin);
+                    Assert::IsTrue(btVector3(+1, +1, 0).distance(b.m_max) <= 2 * c_margin);
+                }
+
+                s->getMeshPart(0)->unlockChildShapes();
+
+                // not implemented!
+                //Assert::AreEqual(1, s->getNumChildShapes());
+                //Assert::IsTrue(nullptr != s->getChildShape(0));
             }
 
             TEST_METHOD(local_data_of_gimpact_mesh_shape_in_collision_object)

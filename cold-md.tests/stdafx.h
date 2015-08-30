@@ -10,6 +10,8 @@
 // Headers for CppUnitTest
 #include "CppUnitTest.h"
 
+#include <boost/scope_exit.hpp>
+
 // TODO: reference additional headers your program requires here
 #include <btBulletCollisionCommon.h>
 #include <btBulletDynamicsCommon.h>
@@ -28,3 +30,5 @@
 #include <functional>
 #include <memory>
 #include <iterator>
+#include <queue>
+#include <stack>

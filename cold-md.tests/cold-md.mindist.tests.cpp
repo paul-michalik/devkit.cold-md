@@ -127,16 +127,49 @@ namespace tests {
                     Assert::IsTrue(btVector3(+1, +1, 0).distance(max) <= 2 * c_margin);
                 }
 
+
+                // for some reason, shape'shape own box set is there but it'shape empty!
+                Assert::IsTrue(nullptr != s->getBoxSet());
+                Assert::IsTrue(0 == s->getBoxSet()->getNodeCount());
+
+                // This invokes an assertion!?
+                //Assert::AreEqual(0, shape->getNumChildShapes());
+
+
                 Assert::AreEqual(1, s->getMeshPartCount());
-                Assert::IsTrue(nullptr != s->getMeshPart(0));
-                Assert::IsTrue(nullptr != s->getMeshPart(0)->getBoxSet());
+
+                auto actual_mesh = s->getMeshPart(0);
+
+                Assert::IsTrue(nullptr != actual_mesh);
 
                 // This is necessary, otherwise the data just isn't there.
                 // I don't see a reason, maybe google saw one...
-                s->getMeshPart(0)->lockChildShapes();
-                Assert::IsTrue(0 < s->getMeshPart(0)->getBoxSet()->getNodeCount());
-                Assert::IsTrue(nullptr != s->getMeshPart(0)->getBoxSet()->getPrimitiveManager());
-                Assert::AreEqual(2, s->getMeshPart(0)->getBoxSet()->getPrimitiveManager()->get_primitive_count());
+                actual_mesh->lockChildShapes();
+
+                Logger::WriteMessage(mstest_utils::wlog_message() <<
+                    "actual_mesh->getNumChildShapes(): " << actual_mesh->getNumChildShapes() << endl);
+                Assert::AreEqual(2, actual_mesh->getNumChildShapes());
+
+                Assert::IsTrue(nullptr != actual_mesh->getBoxSet());
+                Logger::WriteMessage(mstest_utils::wlog_message() <<
+                    "getBoxSet()->getNodeCount(): " << actual_mesh->getBoxSet()->getNodeCount() << endl);
+                Assert::IsTrue(0 < actual_mesh->getBoxSet()->getNodeCount());
+                // one node at top, two subnodes for each child consisting which are leaves with triangles in this case!
+                //    r
+                //  /   \
+                // n1   n2
+                // |    |
+                // t1   t2
+                Assert::AreEqual(3, actual_mesh->getBoxSet()->getNodeCount());
+
+
+                auto actual_mesh_pm = actual_mesh->getPrimitiveManager();
+                Assert::IsTrue(nullptr != actual_mesh_pm);
+                Logger::WriteMessage(mstest_utils::wlog_message() 
+                    << "getPrimitiveManager()->get_primitive_count(): " 
+                    << actual_mesh_pm->get_primitive_count() << endl);
+                Assert::AreEqual(2, actual_mesh_pm->get_primitive_count());
+
                 {
                     btPrimitiveTriangle t;
                     auto pm = s->getMeshPart(0)->getBoxSet()->getPrimitiveManager();
@@ -165,8 +198,230 @@ namespace tests {
                 s->getMeshPart(0)->unlockChildShapes();
 
                 // not implemented!
-                //Assert::AreEqual(1, s->getNumChildShapes());
-                //Assert::IsTrue(nullptr != s->getChildShape(0));
+                //Assert::AreEqual(1, shape->getNumChildShapes());
+                //Assert::IsTrue(nullptr != shape->getChildShape(0));
+            }
+
+            TEST_METHOD(access_box_set_data_of_gimpact_mesh)
+            {
+                auto shape = std::make_unique<btGImpactMeshShape>(&c_unit_square_data);
+                shape->setMargin(c_margin);
+                shape->updateBound();
+
+                // mesh consists of mesh parts, this shape has exactly one part
+                // which contains all the data...
+                Assert::AreEqual(1, shape->getMeshPartCount());
+                auto mesh_part = shape->getMeshPart(0);
+                Assert::IsTrue(nullptr != mesh_part);
+
+                // This is necessary, otherwise the data just isn't there...
+                // probably relevant when storing data on gpu device...
+
+                mesh_part->lockChildShapes();
+
+                BOOST_SCOPE_EXIT(mesh_part)
+                {
+                    mesh_part->unlockChildShapes();
+                } BOOST_SCOPE_EXIT_END;
+
+                /* one node at top, two subnodes for each child which 
+                 are leaves with triangles in this case!
+                    r   <- mesh_part, box_set = mesh_part->getBoxSet()
+                  /   \
+                 n1   n2 <- box_set->getNode(0), box_set->getNode(1)
+                 |    |  <- box_set->isLeafNode(0), box_set->isLeafNode(1) = true
+                 t1   t2 
+                */
+
+                Logger::WriteMessage(mstest_utils::wlog_message() <<
+                    "mesh_part->getNumChildShapes(): " << mesh_part->getNumChildShapes() << endl);
+                Assert::AreEqual(2, mesh_part->getNumChildShapes());
+                // nope, this asserts immediately, seems to implemented only for compund shapes!
+                //Assert::IsTrue(nullptr != mesh_part->getChildShape(0));
+                //Logger::WriteMessage(mstest_utils::wlog_message() <<
+                //    "mesh_part->getChildShape(0)->getShapeType(): " << mesh_part->getChildShape(0)->getShapeType() << endl);
+                //Assert::IsTrue(BroadphaseNativeTypes::GIMPACT_SHAPE_PROXYTYPE != mesh_part->getChildShape(0)->getShapeType());
+
+                auto box_set = mesh_part->getBoxSet();
+                Assert::IsTrue(nullptr != box_set);
+                Logger::WriteMessage(mstest_utils::wlog_message() <<
+                    "getBoxSet()->getNodeCount(): " << box_set->getNodeCount() << endl);
+                Assert::IsTrue(0 < box_set->getNodeCount());
+                Assert::AreEqual(3, box_set->getNodeCount());
+
+                // node with index 0 is root
+                Assert::IsFalse(box_set->isLeafNode(0));
+                // left and right node are leaves in this case
+                Assert::IsTrue(box_set->isLeafNode(box_set->getLeftNode(0)));
+                Assert::IsTrue(box_set->isLeafNode(box_set->getRightNode(0)));
+
+                {
+                    btPrimitiveTriangle t;
+                    box_set->getNodeTriangle(box_set->getLeftNode(0), t);
+                    Logger::WriteMessage(mstest_utils::wlog_message() <<
+                        "triangle(0): " << std::endl <<
+                        "0: " << t.m_vertices[0].getX() << ", " << t.m_vertices[0].getY() << ", " << t.m_vertices[0].getZ() << std::endl <<
+                        "1: " << t.m_vertices[1].getX() << ", " << t.m_vertices[1].getY() << ", " << t.m_vertices[1].getZ() << std::endl <<
+                        "2: " << t.m_vertices[2].getX() << ", " << t.m_vertices[2].getY() << ", " << t.m_vertices[2].getZ() << std::endl << endl);
+                    Assert::IsTrue(btVector3(-1, -1, 0).distance(t.m_vertices[0]) < c_margin);
+                    Assert::IsTrue(btVector3(+1, -1, 0).distance(t.m_vertices[1]) < c_margin);
+                    Assert::IsTrue(btVector3(+1, +1, 0).distance(t.m_vertices[2]) < c_margin);
+                }
+                {
+                    btPrimitiveTriangle t;
+                    box_set->getNodeTriangle(box_set->getRightNode(0), t);
+                    Logger::WriteMessage(mstest_utils::wlog_message() <<
+                        "triangle(1): " << std::endl <<
+                        "0: " << t.m_vertices[0].getX() << ", " << t.m_vertices[0].getY() << ", " << t.m_vertices[0].getZ() << std::endl <<
+                        "1: " << t.m_vertices[1].getX() << ", " << t.m_vertices[1].getY() << ", " << t.m_vertices[1].getZ() << std::endl <<
+                        "2: " << t.m_vertices[2].getX() << ", " << t.m_vertices[2].getY() << ", " << t.m_vertices[2].getZ() << std::endl << endl);
+                    Assert::IsTrue(btVector3(+1, +1, 0).distance(t.m_vertices[0]) < c_margin);
+                    Assert::IsTrue(btVector3(-1, +1, 0).distance(t.m_vertices[1]) < c_margin);
+                    Assert::IsTrue(btVector3(-1, -1, 0).distance(t.m_vertices[2]) < c_margin);
+                }
+                {
+                    btAABB b;
+                    box_set->getNodeBound(0, b);
+                    Logger::WriteMessage(mstest_utils::wlog_message() <<
+                        "getBoxSet()->getNodeBound(0, b): " <<
+                        b.m_min.getX() << ", " << b.m_min.getY() << ", " << b.m_min.getZ() << std::endl <<
+                        b.m_max.getX() << ", " << b.m_max.getY() << ", " << b.m_max.getZ() << endl);
+                    Assert::IsTrue(btVector3(-1, -1, 0).distance(b.m_min) <= 2 * c_margin);
+                    Assert::IsTrue(btVector3(+1, +1, 0).distance(b.m_max) <= 2 * c_margin);
+                }
+                {
+                    btAABB b;
+                    box_set->getNodeBound(1, b);
+                    Logger::WriteMessage(mstest_utils::wlog_message() <<
+                        "getBoxSet()->getNodeBound(1, b): " <<
+                        b.m_min.getX() << ", " << b.m_min.getY() << ", " << b.m_min.getZ() << std::endl <<
+                        b.m_max.getX() << ", " << b.m_max.getY() << ", " << b.m_max.getZ() << endl);
+                    Assert::IsTrue(btVector3(-1, -1, 0).distance(b.m_min) <= 2 * c_margin);
+                    Assert::IsTrue(btVector3(+1, +1, 0).distance(b.m_max) <= 2 * c_margin);
+                }
+            }
+
+            TEST_METHOD(access_primitive_data_of_gimpact_mesh)
+            {
+                auto shape = std::make_unique<btGImpactMeshShape>(&c_unit_square_data);
+                shape->setMargin(c_margin);
+                shape->updateBound();
+
+                Assert::AreEqual(1, shape->getMeshPartCount());
+                auto mesh_part = shape->getMeshPart(0);
+                Assert::IsTrue(nullptr != mesh_part);
+
+                // This is necessary, otherwise the data just isn't there...
+                // probably relevant when storing data on gpu device...
+                mesh_part->lockChildShapes();
+
+                BOOST_SCOPE_EXIT(mesh_part)
+                {
+                    mesh_part->unlockChildShapes();
+                } BOOST_SCOPE_EXIT_END;
+
+                auto prim_manager = mesh_part->getPrimitiveManager();
+                Assert::IsTrue(nullptr != prim_manager);
+                Logger::WriteMessage(mstest_utils::wlog_message()
+                    << "getPrimitiveManager()->get_primitive_count(): "
+                    << prim_manager->get_primitive_count() << endl);
+                Assert::AreEqual(2, prim_manager->get_primitive_count());
+
+                {
+                    btPrimitiveTriangle t;
+                    prim_manager->get_primitive_triangle(0, t);
+                    Logger::WriteMessage(mstest_utils::wlog_message()
+                        << "triangle[0]: " << std::endl
+                        << "0: " << t.m_vertices[0].getX() << ", " << t.m_vertices[0].getY() << ", " << t.m_vertices[0].getZ() << std::endl
+                        << "1: " << t.m_vertices[1].getX() << ", " << t.m_vertices[1].getY() << ", " << t.m_vertices[2].getZ() << std::endl
+                        << "2: " << t.m_vertices[2].getX() << ", " << t.m_vertices[2].getY() << ", " << t.m_vertices[2].getZ() << endl);
+
+                    Assert::IsTrue(btVector3(-1, -1, 0).distance(t.m_vertices[0]) < c_margin);
+                    Assert::IsTrue(btVector3(+1, -1, 0).distance(t.m_vertices[1]) < c_margin);
+                    Assert::IsTrue(btVector3(+1, +1, 0).distance(t.m_vertices[2]) < c_margin);
+                }
+                {
+                    btAABB b;
+                    prim_manager->get_primitive_box(0, b);
+                    Assert::IsTrue(btVector3(-1, -1, 0).distance(b.m_min) <= 2 * c_margin);
+                    Assert::IsTrue(btVector3(+1, +1, 0).distance(b.m_max) <= 2 * c_margin);
+
+                    prim_manager->get_primitive_box(1, b);
+                    Assert::IsTrue(btVector3(-1, -1, 0).distance(b.m_min) <= 2 * c_margin);
+                    Assert::IsTrue(btVector3(+1, +1, 0).distance(b.m_max) <= 2 * c_margin);
+                }
+            }
+
+            void traverse_box_tree_in_order(btGImpactBoxSet const* box_set_)
+            {
+                btAABB b;
+                std::queue<int> queue;
+
+                queue.push(0);
+
+                while (!queue.empty()) {
+                    auto i = queue.front();
+                    queue.pop();
+                    
+                    if (!box_set_->isLeafNode(i)) {
+                        queue.push(box_set_->getLeftNode(i));
+                        queue.push(box_set_->getRightNode(i));
+                    }
+
+                    box_set_->getNodeBound(i, b);
+
+                    Logger::WriteMessage(mstest_utils::wlog_message() <<
+                        "box[" << i << "]" << std::endl << 
+                        b.m_min.getX() << ", " << b.m_min.getY() << ", " << b.m_min.getZ() << std::endl <<
+                        b.m_max.getX() << ", " << b.m_max.getY() << ", " << b.m_max.getZ() << endl);
+                }
+            }
+
+            void traverse(btGImpactMeshShape* mesh_shape_)
+            {
+                for (auto mp_index = 0; mp_index < mesh_shape_->getMeshPartCount(); ++mp_index) {
+                    auto mesh_part = mesh_shape_->getMeshPart(mp_index);
+
+                    mesh_part->lockChildShapes();
+
+                    BOOST_SCOPE_EXIT(mesh_part)
+                    {
+                        mesh_part->unlockChildShapes();
+                    } BOOST_SCOPE_EXIT_END;
+
+                    Assert::IsTrue(nullptr != mesh_part->getBoxSet());
+
+                    if (auto box_set = mesh_part->getBoxSet()) {
+                        traverse_box_tree_in_order(box_set);
+                    }
+                }
+            }
+
+            TEST_METHOD(can_traverse_gimpact_mesh_shape)
+            {
+                auto shape = std::make_unique<btGImpactMeshShape>(&c_unit_square_data);
+                shape->setMargin(c_margin);
+                shape->updateBound();
+
+                // mesh consists of mesh parts, this shape has exactly one part
+                // which contains all the data...
+                Assert::AreEqual(1, shape->getMeshPartCount());
+                auto mesh_part = shape->getMeshPart(0);
+                Assert::IsTrue(nullptr != mesh_part);
+
+                // This is necessary, otherwise the data just isn't there...
+                // probably relevant when storing data on gpu device...
+
+                /* one node at top, two subnodes for each child which
+                are leaves with triangles in this case!
+                r   <- mesh_part, box_set = mesh_part->getBoxSet()
+                /   \
+                n1   n2 <- box_set->getNode(0), box_set->getNode(1)
+                |    |  <- box_set->isLeafNode(0), box_set->isLeafNode(1) = true
+                t1   t2
+                */
+
+                traverse(shape.get());
             }
 
             TEST_METHOD(local_data_of_gimpact_mesh_shape_in_collision_object)

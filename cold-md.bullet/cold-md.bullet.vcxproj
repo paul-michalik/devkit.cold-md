@@ -123,6 +123,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\cold-md\bullet\min_dist_calculator.h" />
     <ClInclude Include="..\cold-md\bullet\world.h" />
   </ItemGroup>
   <ItemGroup>

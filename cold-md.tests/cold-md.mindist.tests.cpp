@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 #include <cold-md/bullet/world.h>
+#include <cold-md/bullet/min_dist_calculator.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -424,17 +425,18 @@ namespace tests {
                 traverse(shape.get());
             }
 
-            TEST_METHOD(local_data_of_gimpact_mesh_shape_in_collision_object)
+            TEST_METHOD(min_dist_find_collision)
             {
-                auto s = std::make_unique<btGImpactMeshShape>(&c_unit_square_data);
-                s->setMargin(0.001);
-                s->updateBound();
-
-                auto o = std::make_unique<btCollisionObject>();
-                o->setCollisionShape(s.get());
-                o->setWorldTransform(
-                    btTransform(btQuaternion(0, 0, 0), btVector3(0, 0, 0)));
             }
+
+            TEST_METHOD(min_dist_calculator_calculate)
+            {
+            }
+
+            TEST_METHOD(min_dist_calculator_calculate_pair)
+            {
+            }
+
         };
     }
 }

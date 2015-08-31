@@ -18,6 +18,9 @@
     <ClInclude Include="..\cold-md\bullet\world.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\cold-md\bullet\min_dist_calculator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\cold-md\bullet\world.cpp">

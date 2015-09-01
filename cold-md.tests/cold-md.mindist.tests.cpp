@@ -425,15 +425,48 @@ namespace tests {
                 traverse(shape.get());
             }
 
-            TEST_METHOD(min_dist_find_collision)
+            struct min_dist_calculator_fixture_a_b_ {
+                cold::bullet::world world;
+                btGImpactMeshShape shape_a = &c_unit_square_data;
+                btGImpactMeshShape shape_b = &c_unit_square_data;
+                btCollisionObject obj_a, obj_b;
+
+                min_dist_calculator_fixture_a_b_(
+                    btTransform const & transf_a_, 
+                    btTransform const & transf_b_)
+                {
+                    shape_a.setMargin(c_margin);
+                    shape_a.updateBound();
+                    obj_a.setCollisionShape(&shape_a);
+                    obj_a.setWorldTransform(transf_a_);
+
+                    shape_b.setMargin(c_margin);
+                    shape_b.updateBound();
+                    obj_b.setCollisionShape(&shape_b);
+                    obj_b.setWorldTransform(transf_b_);
+                }
+            };
+
+            TEST_METHOD(min_dist_calculator_from_collision_a_b)
+            {
+                // arrange (collision):
+                min_dist_calculator_fixture_a_b_ fixture(
+                    btTransform(btQuaternion(0., 0., 0.), btVector3(-0.5, 0, 0)),
+                    btTransform(btQuaternion(0., 0., 0.), btVector3(+0.5, 0, 0)));
+               
+                // act
+                cold::bullet::min_dist_calculator calc(fixture.world.get_world());
+
+                // assert:
+                auto result = calc.calculate();
+                Assert::AreEqual(2u, result.size());
+            }
+
+            TEST_METHOD(min_dist_calculator_calculate_a_b)
             {
             }
 
-            TEST_METHOD(min_dist_calculator_calculate)
-            {
-            }
-
-            TEST_METHOD(min_dist_calculator_calculate_pair)
+            TEST_METHOD(min_dist_calculator_calculate_pair_a_b)
             {
             }
 

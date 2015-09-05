@@ -455,7 +455,7 @@ namespace tests {
                     btTransform(btQuaternion(0., 0., 0.), btVector3(+0.5, 0, 0)));
                
                 // act
-                cold::bullet::min_dist_calculator calc(fixture.world.get_world());
+                NSBulletPhysicsExt::min_dist_calculator calc(fixture.world.get_world());
 
                 // assert:
                 auto result = calc.calculate();

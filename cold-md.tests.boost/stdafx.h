@@ -23,6 +23,7 @@
 #include <vector>
 #include <array>
 #include <map>
+#include <hash_map>
 #include <type_traits>
 #include <algorithm>
 #include <functional>

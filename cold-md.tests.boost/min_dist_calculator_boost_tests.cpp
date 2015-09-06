@@ -8,37 +8,47 @@ namespace tests {
     bool initialize_global_fixture();
 
     // this isn´t working, crashes in bullet, some initialization issues coming on me...
-    //const bool c_global_fixture_initialiter = initialize_global_fixture();
+    const bool c_global_fixture_initialiter = initialize_global_fixture();
 
     namespace bullet_physics_min_dist {
 
         class min_dist_world : boost::noncopyable {
-            btDbvtBroadphase* _col_broadphase = new btDbvtBroadphase;
-            btDefaultCollisionConfiguration* _col_configuration = new btDefaultCollisionConfiguration;
-            btCollisionDispatcher* _col_dispatcher = new btCollisionDispatcher{_col_configuration};
+            btDbvtBroadphase _col_broadphase;
+            btDefaultCollisionConfiguration _col_configuration;
+            btCollisionDispatcher _col_dispatcher = &_col_configuration;
 
-            btCollisionWorld* _world = new btCollisionWorld {
-               _col_dispatcher,
-               _col_broadphase,
-               _col_configuration
+            btCollisionWorld _world = {
+               &_col_dispatcher,
+               &_col_broadphase,
+               &_col_configuration
             };
+
+            //btDbvtBroadphase* _col_broadphase = new btDbvtBroadphase;
+            //btDefaultCollisionConfiguration* _col_configuration = new btDefaultCollisionConfiguration;
+            //btCollisionDispatcher* _col_dispatcher = new btCollisionDispatcher{_col_configuration};
+
+            //btCollisionWorld* _world = new btCollisionWorld {
+            //   _col_dispatcher,
+            //   _col_broadphase,
+            //   _col_configuration
+            //};
         public:
             min_dist_world()
             {
-                btGImpactCollisionAlgorithm::registerAlgorithm(_col_dispatcher);
+                btGImpactCollisionAlgorithm::registerAlgorithm(&_col_dispatcher);
             }
 
             ~min_dist_world()
             {
-                delete _world;
-                delete _col_dispatcher;
-                delete _col_configuration;
-                delete _col_broadphase;
+                //delete _world;
+                //delete _col_dispatcher;
+                //delete _col_configuration;
+                //delete _col_broadphase;
             }
 
             btCollisionWorld* get()
             {
-                return _world;
+                return &_world;
             }
         };
 
@@ -109,7 +119,7 @@ namespace tests {
         // a is translated by {-1, -1, -1}
         // b is translated by {+1, +1, +1}
         // => a, b are coincident in a corner at {0, 0, 0}
-        BOOST_AUTO_TEST_CASE(two_penetrating_squares_in_position_p1_0_have_minimum_distance_zero_at_one_point)
+        BOOST_AUTO_TEST_CASE(two_squares_touching_in_one_point_have_distance_zero_at_origin)
         {
             auto const move_diag = 1.;
 
@@ -156,12 +166,12 @@ namespace tests {
         // b is rotated around the roll axis by 90 degrees
         // => a, b intersect at line which coincides with the x axis, i.e. the min dist point
         //    has coordinates {a, 0, 0} where a in <-1 - c_precision, +1 + c_precision>
-        BOOST_AUTO_TEST_CASE(two_intersecting_squares_in_position_p1_1_have_minimum_distance_zero_at_one_point)
+        BOOST_AUTO_TEST_CASE(two_intersecting_squares_have_minimum_distance_zero_at_all_point_along_the_intersection)
         {
             ///@ Given a collision world with colliding two mesh objects a and b...
             min_dist_fixture fixture = {
                btTransform({0, 0, 0},{0, 0, 0}), // a
-               btTransform({0, 0, SIMD_PI / 2.0},{0, 0, 0})  // b
+               btTransform({0, SIMD_PI / 2.0, 0},{0, 0, 0})  // b
                 // CAUTION: the notion of yaw, pitch, roll depends on the definion of
                 // BT_EULER_DEFAULT_ZYX , see http://bulletphysics.org/Bullet/BulletFull/classbtQuaternion.html#a8bd5d699377ba585749d325076616ffb
             };
@@ -208,18 +218,47 @@ namespace tests {
         }
 
         // define position p2...
-        BOOST_AUTO_TEST_CASE(two_non_penetrating_squares_in_position_p2_have_minimum_distances_as_expected)
+        BOOST_AUTO_TEST_CASE(two_parallel_squares_have_minimum_distance_as_expected)
         {
             ///@ Given a collision world with non-colliding two mesh objects a, b in position p2...
             min_dist_fixture fixture = {
-               btTransform({0., 0., 0.},{-1., 0., 0.}), // a
-               btTransform({0., 0., 0.},{+1., 0., 0.})  // b
+               btTransform({0., 0., 0.},{0., 0., +0.5}), // a
+               btTransform({0., 0., 0.},{0., 0., -0.5})  // b
             };
 
-            // this is assumed!
+            // It is always assumed that performDiscreteCollisionDetection was performed...
             fixture.world.get()->performDiscreteCollisionDetection();
 
-            BOOST_FAIL("Not yet implemented!");
+            //@ When I calculate the minimimum distances in this world...
+            NSBulletPhysicsExt::min_dist_calculator calc(fixture.world.get());
+            auto act_result_matrix = calc.calculate();
+
+            ///@ Then the number of results in the output matrix is 1
+            BOOST_REQUIRE_EQUAL(1u, act_result_matrix.size());
+
+            ///@ And the entry <act> has following properties:
+            auto const& act = act_result_matrix.front();
+
+            BOOST_TEST_MESSAGE(act);
+
+            ///@ - result was computed and object references are set to proper objects
+            BOOST_REQUIRE(act.obj_a == fixture.objects[0].get());
+            BOOST_REQUIRE(act.obj_b == fixture.objects[1].get());
+
+            ///@ - distance is close to 1.
+            BOOST_CHECK((1. - c_precision) <= act.distance && act.distance <= (1. + c_precision));
+            BOOST_CHECK(
+                (1. - c_precision) <= act.point_on_a.distance(act.point_on_b) &&
+                act.point_on_a.distance(act.point_on_b) <= (1. + c_precision));
+
+            ///@ the z coordinates of the point are as expected
+            BOOST_CHECK(
+                (0.5 - c_precision) <= act.point_on_a.getZ() &&
+                act.point_on_a.getZ() < (0.5 + c_precision));
+
+            BOOST_CHECK(
+                (-0.5 - c_precision) <= act.point_on_b.getZ() &&
+                act.point_on_a.getZ() < (-0.5 + c_precision));
         }
 
         // define position p2...

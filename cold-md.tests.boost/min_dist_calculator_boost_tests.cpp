@@ -258,7 +258,7 @@ namespace tests {
 
             BOOST_CHECK(
                 (-0.5 - c_precision) <= act.point_on_b.getZ() &&
-                act.point_on_a.getZ() < (-0.5 + c_precision));
+                act.point_on_b.getZ() < (-0.5 + c_precision));
         }
 
         // define position p2...

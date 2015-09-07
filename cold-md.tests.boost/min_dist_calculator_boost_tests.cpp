@@ -56,7 +56,7 @@ namespace tests {
 
         // We will probably never get results which are more precise than that since
         // bullet always add/subtracts the given "margin" to/from all results or inputs.
-        const btScalar c_precision = std::nextafter(2. * c_margin, (3. * c_margin));
+        const btScalar c_precision = std::nextafter(2.5 * c_margin, (10. * c_margin));
 
         std::array<btScalar, 4 * 3> c_unit_square_ver = {
            -1, -1, 0,
@@ -171,7 +171,7 @@ namespace tests {
             ///@ Given a collision world with colliding two mesh objects a and b...
             min_dist_fixture fixture = {
                btTransform({0, 0, 0},{0, 0, 0}), // a
-               btTransform({0, SIMD_PI / 2.0, 0},{0, 0, 0})  // b
+               btTransform({0, SIMD_HALF_PI, 0},{0, 0, 0})  // b
                 // CAUTION: the notion of yaw, pitch, roll depends on the definion of
                 // BT_EULER_DEFAULT_ZYX , see http://bulletphysics.org/Bullet/BulletFull/classbtQuaternion.html#a8bd5d699377ba585749d325076616ffb
             };
@@ -266,15 +266,112 @@ namespace tests {
         {
             ///@ Given a collision world with non-colliding three mesh objects a, b, c in position p3...
             min_dist_fixture fixture = {
-               btTransform({0., 0., 0.},{-1., 0., 0.}), // a
-               btTransform({0., 0., 0.},{+1., 0., 0.}), // b
-               btTransform({0., 0., 0.},{ 0.,+1., 0.})  // c
+               btTransform({0., 0., 0.}, {0., 0., 0.}),   // a
+               btTransform({0., 0., 0.}, {0., -2.5, 0.}), // b
+               btTransform({SIMD_HALF_PI, 0., 0.}, { 2., 0., 0.}) // c
+               // CAUTION: the notion of yaw, pitch, roll depends on the definion of
+               // BT_EULER_DEFAULT_ZYX , see http://bulletphysics.org/Bullet/BulletFull/classbtQuaternion.html
             };
 
-            // this is assumed!
+            // It is always assumed that performDiscreteCollisionDetection was performed...
             fixture.world.get()->performDiscreteCollisionDetection();
 
-            BOOST_FAIL("Not yet implemented!");
+            //@ When I calculate the minimimum distances in this world...
+            NSBulletPhysicsExt::min_dist_calculator calc(fixture.world.get());
+            auto act_result_matrix = calc.calculate();
+
+            ///@ Then the number of results in the output matrix is 3
+            BOOST_REQUIRE_EQUAL(3u, act_result_matrix.size());
+
+            {
+                ///@ And the entry[0] = d(a, b) has following properties:
+                auto const& act = act_result_matrix[0];
+
+                BOOST_TEST_MESSAGE(act);
+
+                ///@ - result was computed and object references are set to proper objects
+                BOOST_REQUIRE(act.obj_a == fixture.objects[0].get());
+                BOOST_REQUIRE(act.obj_b == fixture.objects[1].get());
+
+                ///@ - distance is close to 0.5
+                BOOST_CHECK(
+                    (0.5 - c_precision) <= act.distance &&
+                    act.distance <= (0.5 + c_precision));
+                BOOST_CHECK(
+                    (0.5 - c_precision) <= act.point_on_a.distance(act.point_on_b) &&
+                    act.point_on_a.distance(act.point_on_b) <= (0.5 + c_precision));
+
+                ///@ the y coordinates of the point are as expected
+                BOOST_CHECK(
+                    (-1. - c_precision) <= act.point_on_a.getY() &&
+                    act.point_on_a.getY() < (-1. + c_precision));
+                BOOST_CHECK(
+                    (-1.5 - c_precision) <= act.point_on_b.getY() &&
+                    act.point_on_b.getY() < (-1.5 + c_precision));
+            }
+
+            {
+                ///@ And the entry[1] = d(a, c) has following properties:
+                auto const& act = act_result_matrix[1];
+
+                BOOST_TEST_MESSAGE(act);
+
+                ///@ - result was computed and object references are set to proper objects
+                BOOST_REQUIRE(act.obj_a == fixture.objects[0].get());
+                BOOST_REQUIRE(act.obj_b == fixture.objects[2].get());
+
+                ///@ - distance is close to 1
+                BOOST_CHECK(
+                    (1. - c_precision) <= act.distance &&
+                    act.distance <= (1. + c_precision));
+                BOOST_CHECK(
+                    (1. - c_precision) <= act.point_on_a.distance(act.point_on_b) &&
+                    act.point_on_a.distance(act.point_on_b) <= (1. + c_precision));
+
+                ///@ the x coordinates of the point are as expected
+                BOOST_CHECK(
+                    (1. - c_precision) <= act.point_on_a.getX() &&
+                    act.point_on_a.getX() < (1. + c_precision));
+                BOOST_CHECK(
+                    (2. - c_precision) <= act.point_on_b.getX() &&
+                    act.point_on_b.getX() < (2. + c_precision));
+            }
+
+            {
+                ///@ And the entry[2] =  = d(b, c) has following properties:
+                auto const& act = act_result_matrix[2];
+
+                BOOST_TEST_MESSAGE(act);
+
+                ///@ - result was computed and object references are set to proper objects
+                BOOST_REQUIRE(act.obj_a == fixture.objects[1].get());
+                BOOST_REQUIRE(act.obj_b == fixture.objects[2].get());
+
+                ///@ - distance is close to (1/2) * (sqrt(5))
+                auto const exp_dist = 0.5 * std::sqrt(5.);
+                BOOST_CHECK(
+                    (exp_dist - c_precision) <= act.distance &&
+                    act.distance <= (exp_dist + c_precision));
+                BOOST_CHECK(
+                    (exp_dist - c_precision) <= act.point_on_a.distance(act.point_on_b) &&
+                    act.point_on_a.distance(act.point_on_b) <= (exp_dist + c_precision));
+
+                ///@ the x coordinates of the point are as expected
+                BOOST_CHECK(
+                    (1. - c_precision) <= act.point_on_a.getX() &&
+                    act.point_on_a.getX() < (1. + c_precision));
+                BOOST_CHECK(
+                    (2. - c_precision) <= act.point_on_b.getX() &&
+                    act.point_on_b.getX() < (2. + c_precision));
+
+                ///@ the y coordinates of the point are as expected
+                BOOST_CHECK(
+                    (-1.5 - c_precision) <= act.point_on_a.getY() &&
+                    act.point_on_a.getY() < (-1.5 + c_precision));
+                BOOST_CHECK(
+                    (-1. - c_precision) <= act.point_on_b.getY() &&
+                    act.point_on_b.getY() < (-1. + c_precision));
+            }
         }
         // etc...
 

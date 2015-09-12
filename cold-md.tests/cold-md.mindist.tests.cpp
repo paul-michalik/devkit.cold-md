@@ -22,8 +22,8 @@ namespace tests {
         };
 
         btTriangleIndexVertexArray c_unit_square_data(
-            c_unit_square_tri.size() / 3u, &c_unit_square_tri[0], 3 * sizeof(int),
-            c_unit_square_ver.size() / 3u, &c_unit_square_ver[0], 3 * sizeof(btScalar));
+            (int)c_unit_square_tri.size() / 3u, &c_unit_square_tri[0], 3 * sizeof(int),
+            (int)c_unit_square_ver.size() / 3u, &c_unit_square_ver[0], 3 * sizeof(btScalar));
 
         class test_objects {
         public:

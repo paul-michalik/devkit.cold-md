@@ -21,6 +21,15 @@
     <ClInclude Include="..\cold-md\bullet\min_dist_calculator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\cold-md\bullet\min_dist_traits.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\cold-md\bullet\min_dist_types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\cold-md\bullet\min_dist_bullet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\cold-md\bullet\world.cpp">
